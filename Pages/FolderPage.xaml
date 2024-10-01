@@ -1,0 +1,117 @@
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:model="clr-namespace:MyNotes.Models"
+             xmlns:viewModel="clr-namespace:MyNotes.ViewModels"
+             x:DataType="viewModel:FolderViewModel"
+             x:Class="MyNotes.Pages.FolderPage"
+             x:Name="ThisPage"
+             Title="FolderPage"
+             Shell.NavBarIsVisible="False">
+    <Grid BackgroundColor="{StaticResource Background1}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!--MENU HOME-->
+        <Grid ColumnDefinitions="*,*,*,*,*,*" Padding="5" BackgroundColor="Transparent" Grid.Row="0" VerticalOptions="CenterAndExpand">
+            <!--A COMPARSA Conferma elimina 1 -->
+            <Frame x:Name="ConfirmDeleteSelected" ZIndex="10" Grid.Column="1" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
+                <ImageButton Aspect="Center" Clicked="DeleteSelected" Source="confirm.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+            </Frame>
+            <!--Bottone elimina 0 -->
+            <Frame Grid.Column="0" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
+                <ImageButton Aspect="Center" Clicked="SelectToDelete" Source="trash.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+            </Frame>
+            <!--Bottone torna indietro 1 -->
+            <Frame Grid.Column="1" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
+                <ImageButton Aspect="Center" Command="{Binding ComeBackCommand}" Source="back.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+            </Frame>
+            <!--Nome cartella 2 -->
+            <Frame Grid.Column="2" Grid.ColumnSpan="3" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Center">
+                <Label Text="{Binding Folder.Name}" TextColor="{StaticResource Text1}" FontAttributes="Bold" FontSize="Medium" VerticalTextAlignment="Center"/>
+            </Frame>
+            <!--Bottone aggiungi nota 4 -->
+            <Frame Grid.Column="6" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
+                <ImageButton Aspect="Center" Clicked="OnAddNoteClicked" Source="addnote.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+            </Frame>
+        </Grid>
+        <!--AVVISO NESSUNA NOTA-->
+        <Label Grid.Row="1" IsVisible="{Binding IsNotesCount}" TextColor="{StaticResource Text1}" Text="No notes inserted" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+        <!--VISTA NOTES-->
+        <ScrollView Grid.Row="3" Padding="10">
+            <CollectionView ItemsSource="{Binding Notes}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="2" VerticalItemSpacing="10" HorizontalItemSpacing="10"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Note">
+                        <Frame Padding="7" Margin="0" BackgroundColor="Transparent" ZIndex="2" BorderColor="{StaticResource Text1}">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
+                                <!--Controllo tap su nota-->
+                                <Frame Padding="20" Grid.RowSpan="2" ZIndex="2" BackgroundColor="Transparent" BorderColor="Transparent">
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.NoteTappedCommand}" CommandParameter="{Binding .}" />
+                                    </Frame.GestureRecognizers>
+                                </Frame>
+                                <!--Data creazione-->
+                                <Frame Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="0" BackgroundColor="Transparent" BorderColor="Transparent" ZIndex="0">
+                                    <Label Text="{Binding Created}" TextColor="{StaticResource Text1}" VerticalTextAlignment="Center" />
+                                </Frame>
+                                <BoxView Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HeightRequest="1" Margin="0,23,0,0" BackgroundColor="{StaticResource First}"/>
+                                <!--Titolo o testo-->
+                                <Frame Grid.Column="0" Grid.Row="1" Padding="0" BackgroundColor="Transparent" BorderColor="Transparent" ZIndex="0">
+                                    <Label Text="{Binding ., Converter={StaticResource TitleOrContentConverter}}" TextColor="DimGrey" VerticalTextAlignment="Start" />
+                                </Frame>
+                                <!--Bottone elimina-->
+                                <Frame ZIndex="2" Grid.Column="1" Grid.Row="1" Padding="5" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" IsVisible="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsNoteCheckerVisible}" BackgroundColor="Transparent" BorderColor="Transparent">
+                                    <CheckBox x:Name="NoteChecker" IsChecked="{Binding IsChecked}" WidthRequest="30" HeightRequest="30" Color="{StaticResource First}"/>
+                                </Frame>
+                                <Frame x:Name="NoteInfo" ZIndex="0" Grid.Column="1" Grid.Row="1" Padding="5" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" IsVisible="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsInfoNoteVisible}" BackgroundColor="Transparent" BorderColor="Transparent">
+                                    <ImageButton Aspect="Center" Clicked="OpenCloseInfoNote" CommandParameter="{Binding .}" Source="info.png" WidthRequest="30" HeightRequest="30" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
+                                </Frame>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <!--POPUP INFO NOTE #E6A9A9A9-->
+        <Frame x:Name="PopupInfoNote" CornerRadius="0" Grid.Row="0" Grid.RowSpan="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource Busy}" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" HasShadow="True">
+            <Frame ZIndex="15" Padding="20" Margin="100, 100, 100, 0" BackgroundColor="{StaticResource Background1}" HasShadow="True" VerticalOptions="Start">
+                <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto, Auto, Auto, Auto" BackgroundColor="Transparent">
+                    <!--INFO TITLE-->
+                    <Frame Grid.Row="0" Grid.ColumnSpan="4" Margin="0,0,0,10" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="CenterAndExpand">
+                        <Label x:Name="InfoNoteName" TextColor="{StaticResource Text1}"/>
+                    </Frame>
+                    <!--INFO CREATED-->
+                    <Frame Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,5" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent">
+                        <Label Text="Created:" TextColor="{StaticResource Text1}"/>
+                    </Frame>
+                    <Frame Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,0,5" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent">
+                        <Label x:Name="InfoNoteCreated" TextColor="{StaticResource Text1}"/>
+                    </Frame>
+                    <!--INFO MODIFIED-->
+                    <Frame Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent">
+                        <Label Text="Modified:" TextColor="{StaticResource Text1}"/>
+                    </Frame>
+                    <Frame Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent">
+                        <Label x:Name="InfoNoteModified" TextColor="{StaticResource Text1}"/>
+                    </Frame>
+                    <!--EXIT-->
+                    <Frame Grid.Row="3" Grid.ColumnSpan="4" Margin="0,15,0,0" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" VerticalOptions="CenterAndExpand">
+                        <ImageButton Aspect="Center" Clicked="OpenCloseInfoNote" Source="info.png" WidthRequest="35" HeightRequest="35" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
+                    </Frame>
+                </Grid>
+            </Frame>
+        </Frame>
+
+
+        <Grid Grid.Row="4" Grid.RowSpan="4" ZIndex="10" IsVisible="{Binding IsBusy}" BackgroundColor="{StaticResource Busy}" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+            <ActivityIndicator IsRunning="{Binding IsBusy}" HorizontalOptions="Center" VerticalOptions="Center" Color="{StaticResource Spinner}" />
+        </Grid>
+    </Grid>
+</ContentPage>

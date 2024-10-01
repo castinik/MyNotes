@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModel="clr-namespace:MyNotes.ViewModels"
+             x:Class="MyNotes.Pages.NotePage"
+             x:DataType="viewModel:NoteViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*" BackgroundColor="{StaticResource Background1}">
+        <!--MENU HOME-->
+        <Grid ColumnDefinitions="*,*,*,*" Padding="5" BackgroundColor="Transparent" Grid.Row="0" VerticalOptions="CenterAndExpand">
+            <!--Bottone salva nota-->
+            <Frame Grid.Column="3" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
+                <ImageButton Aspect="Center" Command="{Binding SaveNoteCommand}" Source="save.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+            </Frame>
+            <Frame Grid.Column="0" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
+                <ImageButton Aspect="Center" Command="{Binding ComeBackCommand}" Source="back.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+            </Frame>
+        </Grid>
+        <Frame Padding="0" Grid.Row="1" VerticalOptions="FillAndExpand" BackgroundColor="Transparent" BorderColor="Transparent">
+            <ScrollView>
+                <Grid RowDefinitions="Auto,*">
+                    <Frame Grid.Row="0" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="StartAndExpand">
+                        <Entry Text="{Binding Note.Title}" TextColor="{StaticResource Text1}" Placeholder="Title" HorizontalOptions="StartAndExpand" MinimumWidthRequest="1000" />
+                    </Frame>
+                    <Frame Grid.Row="1" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" VerticalOptions="FillAndExpand">
+                        <Editor Text="{Binding Note.Content}" TextColor="{StaticResource Text1}" Placeholder="Content" />
+                    </Frame>
+                </Grid>
+            </ScrollView>
+        </Frame>
+        <Grid Grid.RowSpan="2" IsVisible="{Binding IsBusy}" BackgroundColor="{StaticResource Busy}" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           Color="{StaticResource Spinner}" />
+        </Grid>
+    </Grid>
+</ContentPage>
