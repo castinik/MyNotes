@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<style name="MainTheme" parent="Theme.Maui.Splash">
+	<!-- Modifica il colore della status bar -->
+	<item name="android:statusBarColor">@color/status_bar_color</item>
+	<item name="android:windowLightStatusBar">false</item>
+	<!-- Se desideri che le icone siano scure -->
+</style>

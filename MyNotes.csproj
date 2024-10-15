@@ -42,11 +42,10 @@
 
   <ItemGroup>
     <!-- App Icon -->
-    <!--<MauiIcon Include="Resources\AppIcon\iconmynote.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />-->
-    <!--<MauiImage Include="Resources\Images\iconmynote.png" IsAppIcon="true" />-->
+	<MauiIcon Include="Resources\AppIcon\iconmynote.png" IsAppIcon="True" Resize="True" BaseSize="48,48" />
 
     <!-- Splash Screen -->
-    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+    <MauiSplashScreen Include="Resources\Splash\splashscreen.png" Resize="True" BaseSize="228,428" Color="#00204a" />
 
     <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
@@ -60,6 +59,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AndroidResource Remove="Platforms\Android\Resources\values\styles.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.90" />
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.90" />

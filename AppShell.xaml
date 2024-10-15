@@ -6,7 +6,6 @@
     xmlns:local="clr-namespace:MyNotes.Pages"
     Shell.FlyoutBehavior="Disabled"
     Title="MyNotes">
-
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"

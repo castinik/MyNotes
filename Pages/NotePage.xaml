@@ -21,10 +21,10 @@
             <ScrollView>
                 <Grid RowDefinitions="Auto,*">
                     <Frame Grid.Row="0" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="StartAndExpand">
-                        <Entry Text="{Binding Note.Title}" TextColor="{StaticResource Text1}" Placeholder="Title" HorizontalOptions="StartAndExpand" MinimumWidthRequest="1000" />
+                        <Entry Text="{Binding Note.Title}" TextColor="{StaticResource Text2}" Placeholder="Title" HorizontalOptions="StartAndExpand" MinimumWidthRequest="1000" />
                     </Frame>
                     <Frame Grid.Row="1" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" VerticalOptions="FillAndExpand">
-                        <Editor Text="{Binding Note.Content}" TextColor="{StaticResource Text1}" Placeholder="Content" />
+                        <Editor Text="{Binding Note.Content}" TextColor="{StaticResource Text2}" Placeholder="Content" />
                     </Frame>
                 </Grid>
             </ScrollView>
