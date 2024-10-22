@@ -13,7 +13,7 @@ namespace MyNotes.Models
         {
             Id = note.Id;
             Created = note.Created;
-            Modify = DateTime.Now;
+            Modify = note.Modify;
             Title = note.Title;
             Content = note.Content;
         }

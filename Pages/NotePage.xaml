@@ -11,24 +11,52 @@
         <Grid ColumnDefinitions="*,*,*,*" Padding="5" BackgroundColor="Transparent" Grid.Row="0" VerticalOptions="CenterAndExpand">
             <!--Bottone salva nota-->
             <Frame Grid.Column="3" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
-                <ImageButton Aspect="Center" Command="{Binding SaveNoteCommand}" Source="save.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+                <ImageButton Aspect="Center" Command="{Binding SaveNoteCommand}" Source="ysave.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
             </Frame>
             <Frame Grid.Column="0" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
-                <ImageButton Aspect="Center" Command="{Binding ComeBackCommand}" Source="back.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+                <ImageButton Aspect="Center" Command="{Binding ComeBackCommand}" Source="yback.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
             </Frame>
         </Grid>
+        <!--CONTENT-->
         <Frame Padding="0" Grid.Row="1" VerticalOptions="FillAndExpand" BackgroundColor="Transparent" BorderColor="Transparent">
-            <ScrollView>
-                <Grid RowDefinitions="Auto,*">
-                    <Frame Grid.Row="0" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="StartAndExpand">
-                        <Entry Text="{Binding Note.Title}" TextColor="{StaticResource Text2}" Placeholder="Title" HorizontalOptions="StartAndExpand" MinimumWidthRequest="1000" />
+            <!--GRIGLIA CONTENUTO EDITOR-->
+            <Grid RowDefinitions="Auto,*" ColumnDefinitions="160, *" BackgroundColor="Transparent">
+                <!--TITOLO-->
+                <Frame Grid.Row="0" Grid.Column="0" Padding="5,0,0,0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Fill">
+                    <Entry Text="{Binding Note.Title}" TextColor="{StaticResource Text1}" Placeholder="Title" HorizontalOptions="Fill" />
+                </Frame>
+                <!--MENU EDITOR-->
+                <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" BackgroundColor="Transparent" HorizontalOptions="End">
+                    <!--ELENCO PUNTATO-->
+                    <Frame Grid.Column="0" Padding="0" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
+                        <ImageButton Aspect="Center" Clicked="ElencoButtonClicked" Source="elenco.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
                     </Frame>
-                    <Frame Grid.Row="1" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" VerticalOptions="FillAndExpand">
-                        <Editor Text="{Binding Note.Content}" TextColor="{StaticResource Text2}" Placeholder="Content" />
+                    <!--LISTA TO DO-->
+                    <Frame Grid.Column="1" Padding="0" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
+                        <ImageButton Aspect="Center" Source="todo.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
+                    </Frame>
+                    <!--SOTTOLINEA-->
+                    <Frame Grid.Column="2" Padding="0" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
+                        <ImageButton Aspect="Center" Source="underlined.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
+                    </Frame>
+                    <!--GRASSETTO-->
+                    <Frame Grid.Column="3" Padding="0" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
+                        <ImageButton Aspect="Center" Source="bold.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
+                    </Frame>
+                    <!--ITALIC-->
+                    <Frame Grid.Column="4" Padding="0" Margin="0,0,12,0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
+                        <ImageButton Aspect="Center" Source="italic.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
                     </Frame>
                 </Grid>
-            </ScrollView>
+                <!--CONTENUTO-->
+                <Frame Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Padding="5,5,5,5" BackgroundColor="Transparent" BorderColor="Transparent" VerticalOptions="Fill" HorizontalOptions="Fill">
+                    <ScrollView VerticalScrollBarVisibility="Never" VerticalOptions="FillAndExpand">
+                        <Editor x:Name="MainEditor" Text="{Binding Note.Content}" TextColor="{StaticResource Text2}" Placeholder="Content" TextChanged="EditorTextChanged"/>
+                    </ScrollView>
+                </Frame>
+            </Grid>
         </Frame>
+        <!--SPINNER-->
         <Grid Grid.RowSpan="2" IsVisible="{Binding IsBusy}" BackgroundColor="{StaticResource Busy}" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
             <ActivityIndicator IsRunning="{Binding IsBusy}"
                            HorizontalOptions="Center"

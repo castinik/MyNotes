@@ -9,28 +9,24 @@ using System.Threading.Tasks;
 
 namespace MyNotes.Converters
 {
-    public class TitleOrContentConverter : IValueConverter
+    public class ModifiedExistConverter : IValueConverter
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is Note note)
             {
-                if (note.Content == null || note.Content.Length == 0)
+                if (note.Created == note.Modify)
                 {
-                    return "No content inserted";
-                }
-                else if (note.Content.Length <= 60)
-                {
-                    return note.Content;
+                    return "No changes";
                 }
                 else
                 {
-                    return note.Content.Substring(0, 60);
+                    return note.Modify;
                 }
             }
             else
             {
-                return "No content";
+                return "";
             }
         }
 

@@ -9,5 +9,6 @@ namespace MyNotes.Services
     static class Data
     {
         public static String DefaultData { get; } = "/storage/emulated/0/Android/Data/com.CKStudios.mynotes/notes";
+        public static String BulletedList { get; } = "• ";
     }
 }

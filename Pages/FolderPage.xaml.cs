@@ -21,8 +21,6 @@ namespace MyNotes.Pages
         {
             base.OnAppearing();
             ConfirmDeleteSelected.IsVisible = false;
-            PopupInfoNote.IsVisible = false;
-
             String folderName = Preferences.Get("tempFolder", null);
             if (!string.IsNullOrEmpty(folderName))
             {
@@ -30,6 +28,13 @@ namespace MyNotes.Pages
                 this.Folder = new Folder { Name = folderName };
             }
             await _vm.LoadNotesAsync();
+            RefreshNotes();
+        }
+
+        protected override bool OnBackButtonPressed()
+        {
+            ComeBack(new object(), new EventArgs());
+            return true;
         }
 
         public Folder Folder
@@ -45,10 +50,30 @@ namespace MyNotes.Pages
             }
         }
 
-        private async void OnAddNoteClicked(object sender, EventArgs e)
+        private async void OnNoteTapped(object sender, TappedEventArgs e)
         {
-            var noteViewModel = new NoteViewModel(_noteService); // Pass INoteService instance
-            await Navigation.PushAsync(new NotePage(noteViewModel));
+            Note note = e.Parameter as Note;
+            if (_vm.IsOnTrashOpen)
+            {
+                Frame frame = sender as Frame;
+                Frame parentFrame = frame.Parent.Parent as Frame;
+                if (note.IsChecked)
+                {
+                    parentFrame.BorderColor = Color.FromArgb("#005792");
+                    parentFrame.BackgroundColor = Color.Parse("#26005792");
+                    note.IsChecked = false;
+                }
+                else
+                {
+                    parentFrame.BorderColor = Color.FromArgb("#C92E2E");
+                    parentFrame.BackgroundColor = Color.FromArgb("#613232");
+                    note.IsChecked = true;
+                }
+            }
+            else
+            {
+                _vm.NoteTappedCommand.Execute(note);
+            }
         }
 
         private async void SelectToDelete(object sender, EventArgs e)
@@ -56,44 +81,54 @@ namespace MyNotes.Pages
             if (ConfirmDeleteSelected.IsVisible)
             {
                 ConfirmDeleteSelected.IsVisible = false;
-                _vm.IsNoteCheckerVisible = false;
-                _vm.IsInfoNoteVisible = true;
-                //await _vm.UnsetElementChecker();
+                _vm.IsOnTrashOpen = false;
+                UncheckAllElements();
             }
             else
             {
                 ConfirmDeleteSelected.IsVisible = true;
-                _vm.IsNoteCheckerVisible = true;
-                _vm.IsInfoNoteVisible = false;
+                _vm.IsOnTrashOpen = true;
             }
         }
         private async void DeleteSelected(object sender, EventArgs e)
         {
             ConfirmDeleteSelected.IsVisible = false;
-            _vm.IsNoteCheckerVisible = false;
-            _vm.IsInfoNoteVisible = true;
-            await _vm.DeleteElementsChecked();
+            _vm.IsOnTrashOpen = false;
+            await this.Dispatcher.DispatchAsync(() =>
+            {
+                _vm.DeleteElementsChecked();
+                RefreshNotes();
+            });
+            UncheckAllElements();
+        }
+        
+        private async void OnAddNoteClicked(object sender, EventArgs e)
+        {
+            if (_vm.IsOnTrashOpen)
+            {
+                UncheckAllElements();
+            }
+            var noteViewModel = new NoteViewModel(_noteService); // Pass INoteService instance
+            await Navigation.PushAsync(new NotePage(noteViewModel));
+        }
+        private async void ComeBack(object sender, EventArgs e)
+        {
+            if (_vm.IsOnTrashOpen)
+            {
+                UncheckAllElements();
+            }
+            _vm.ComeBackCommand.Execute(null);
         }
 
         private void OpenCloseInfoNote(object sender, EventArgs e)
         {
-            if (PopupInfoNote.IsVisible)
+            if (_vm.IsPopUpInfoOpen)
             {
-                PopupInfoNote.IsVisible = false;
-            }
-            else
-            {
-                ImageButton button = sender as ImageButton;
-                Note note = button.CommandParameter as Note;
+                _vm.IsPopUpInfoOpen = false;
+                _vm.IsOnLongPressure = false;
 
-                InfoNoteName.Text = note.Title;
-                InfoNoteCreated.Text = note.Created.ToString("dd/MM/yy HH:mm");
-                InfoNoteModified.Text = note.Modify.ToString("dd/MM/yy HH:mm");
-
-                PopupInfoNote.IsVisible = true;
             }
         }
-
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("Folder", out var folderObj) && folderObj is Folder folder)
@@ -101,5 +136,48 @@ namespace MyNotes.Pages
                 _vm.Folder = folder;
             }
         }
+
+        #region ############### Functional ###############
+        private void UncheckAllElements()
+        {
+            CollectionView collectionViewL = MainViewLeft;
+            CollectionView collectionViewR = MainViewRight;
+            foreach (var element in collectionViewL.GetVisualTreeDescendants())
+            {
+                if (element is Grid)
+                {
+                    Grid grid = element as Grid;
+                    Frame frame = grid.Parent as Frame;
+                    frame.BorderColor = Color.FromArgb("#005792");
+                    frame.BackgroundColor = Color.Parse("#26005792");
+                }
+            }
+            foreach (var element in collectionViewR.GetVisualTreeDescendants())
+            {
+                if (element is Grid)
+                {
+                    Grid grid = element as Grid;
+                    Frame frame = grid.Parent as Frame;
+                    frame.BorderColor = Color.FromArgb("#005792");
+                    frame.BackgroundColor = Color.Parse("#26005792");
+                }
+            }
+            foreach (Note note in _vm.NotesLeft)
+            {
+                note.IsChecked = false;
+            }
+            foreach (Note note in _vm.NotesRight)
+            {
+                note.IsChecked = false;
+            }
+        }
+        private void RefreshNotes()
+        {
+            MainViewLeft.ItemsSource = null;
+            MainViewLeft.ItemsSource = _vm.NotesLeft;
+            MainViewRight.ItemsSource = null;
+            MainViewRight.ItemsSource = _vm.NotesRight;
+        }
+        #endregion
     }
 }

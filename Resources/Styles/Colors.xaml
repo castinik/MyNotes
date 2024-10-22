@@ -8,12 +8,16 @@
 
     <Color x:Key="First">#005792</Color>
     <Color x:Key="Second">#00bbf0</Color>
-    <Color x:Key="Busy">#CFCFCFE0a</Color>
+    <Color x:Key="Busy">#CFCFCFEa</Color>
     <Color x:Key="Background1">#00204a</Color>
     <Color x:Key="Background2">#E6A9A9A9</Color>
+    <Color x:Key="BackgroundDel">#613232</Color>
+    <Color x:Key="BackgroundTran">#26005792</Color>
     <Color x:Key="Spinner">#00204a</Color>
     <Color x:Key="Text1">#fdb44b</Color>
-    <Color x:Key="Text2">#FFF5F2</Color>
+    <Color x:Key="Text2">#E0E0E0</Color>
+    <Color x:Key="Text3">#D3D3D3</Color>
+    <Color x:Key="BorderDel">#C92E2E</Color>
 
     <Color x:Key="Primary">#512BD4</Color>
     <Color x:Key="PrimaryDark">#ac99ea</Color>

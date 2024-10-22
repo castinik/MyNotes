@@ -11,7 +11,7 @@
     <ContentPage.Behaviors>
         <toolkit:StatusBarBehavior StatusBarColor="{StaticResource Background1}" StatusBarStyle="LightContent"/>
     </ContentPage.Behaviors>
-    
+
     <Grid BackgroundColor="{StaticResource Background1}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -19,38 +19,37 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
         <!--MENU HOME-->
         <Grid ColumnDefinitions="*,*,*,*,*,*" Padding="5" BackgroundColor="Transparent" Grid.Row="0" VerticalOptions="CenterAndExpand">
             <!--Bottone elimina-->
             <Frame Grid.Column="0" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
-                <ImageButton Aspect="Center" Clicked="SelectToDelete" Padding="0" Source="trash.png" WidthRequest="40" HeightRequest="40"  BorderWidth="2" CornerRadius="5" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+                <ImageButton Aspect="Center" Clicked="SelectToDelete" Padding="0" Source="ytrash.png" WidthRequest="40" HeightRequest="40"  BorderWidth="2" CornerRadius="5" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
             </Frame>
             <!--A COMPARSA Conferma elimina-->
             <Frame x:Name="ConfirmDeleteSelected" Grid.Column="1" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
-                <ImageButton Aspect="Center" Clicked="DeleteSelected" Source="confirm.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+                <ImageButton Aspect="Center" Clicked="DeleteSelected" Source="rconfirm.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource BackgroundDel}" BorderColor="{StaticResource BorderDel}"/>
             </Frame>
             <!--Bottone aggiungi folder-->
             <Frame Grid.Column="4" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
-                <ImageButton Aspect="Center" Clicked="OpenAddFolder" Source="addfolder.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+                <ImageButton Aspect="Center" Clicked="OpenAddFolder" Source="yaddfolder.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
             </Frame>
             <!--Bottone aggiungi nota-->
             <Frame Grid.Column="6" Padding="10" Margin="0" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="End">
-                <ImageButton Aspect="Center" Clicked="OnAddNoteClicked" Source="addnote.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource Second}" BorderColor="{StaticResource Second}"/>
+                <ImageButton Aspect="Center" Clicked="OnAddNoteClicked" Source="yaddnote.png" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
             </Frame>
         </Grid>
         <!--AVVISO NESSUNA NOTA-->
-        <Label Grid.Row="2" IsVisible="{Binding IsNotesCount}" Text="No notes inserted" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+        <Label Grid.Row="2" IsVisible="{Binding IsNotesCount}" TextColor="{StaticResource Text1}" Text="No notes inserted" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
         <!--VISTA FOLDERS-->
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Folders}" ItemsLayout="HorizontalList">
+        <CollectionView x:Name="MainNoteView" Grid.Row="1" ItemsSource="{Binding Folders}" ItemsLayout="HorizontalList" VerticalOptions="Start">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="model:Folder">
-                    <Frame Padding="12, 5, 12, 5" BackgroundColor="Transparent" BorderColor="Transparent">
-                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="60">
+                    <Frame Padding="12, 5, 12, 5" BackgroundColor="Transparent" MinimumWidthRequest="80" HeightRequest="115" BorderColor="Transparent">
+                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="70">
                             <!--Controllo tap su folder-->
                             <Frame Padding="20" Grid.RowSpan="2" ZIndex="2" BackgroundColor="Transparent" BorderColor="Transparent">
                                 <Frame.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.FolderTappedCommand}" CommandParameter="{Binding .}" />
+                                    <TapGestureRecognizer Tapped="OnFolderTapped" CommandParameter="{Binding .}" />
                                 </Frame.GestureRecognizers>
                             </Frame>
                             <!--Immagine folder-->
@@ -60,98 +59,127 @@
                             <Frame Padding="0" Grid.Column="0" Grid.Row="1" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="CenterAndExpand">
                                 <Label Grid.Row="1" Text="{Binding Name}" HorizontalTextAlignment="Center" VerticalTextAlignment="Start" TextColor="{StaticResource Text1}"/>
                             </Frame>
-                            <Frame ZIndex="10" Padding="0,4,0,0" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" IsVisible="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsFolderCheckerVisible}" BackgroundColor="Transparent" BorderColor="Transparent">
-                                <CheckBox x:Name="FolderChecker" IsChecked="{Binding IsChecked}" Color="{StaticResource First}" />
-                            </Frame>
                         </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
         <!--VISTA NOTES-->
-        <ScrollView Grid.Row="3" Padding="10">
-            <CollectionView ItemsSource="{Binding Notes}">
-                <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical" Span="2" VerticalItemSpacing="10" HorizontalItemSpacing="10"/>
-                </CollectionView.ItemsLayout>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="model:Note">
-                        <Frame Padding="7" Margin="0" BackgroundColor="Transparent" ZIndex="2" BorderColor="{StaticResource Second}">
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
-                                <!--Controllo tap su nota-->
-                                <Frame Padding="20" Grid.RowSpan="2" ZIndex="2" BackgroundColor="Transparent" BorderColor="Transparent">
-                                    <Frame.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.NoteTappedCommand}" CommandParameter="{Binding .}" />
-                                    </Frame.GestureRecognizers>
-                                </Frame>
-                                <!--Data creazione-->
-                                <Frame Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="0" BackgroundColor="Transparent" BorderColor="Transparent" ZIndex="0">
-                                    <Label Text="{Binding Created}" TextColor="{StaticResource Text1}" VerticalTextAlignment="Center" />
-                                </Frame>
-                                <BoxView Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HeightRequest="1" Margin="0,23,0,0" BackgroundColor="{StaticResource First}"/>
-                                <!--Titolo o testo-->
-                                <Frame Grid.Column="0" Grid.Row="1" Padding="0" BackgroundColor="Transparent" BorderColor="Transparent" ZIndex="0">
-                                    <Label Text="{Binding ., Converter={StaticResource TitleOrContentConverter}}" TextColor="DimGrey" VerticalTextAlignment="Start" />
-                                </Frame>
-                                <!--Bottone elimina-->
-                                <Frame ZIndex="2" Grid.Column="1" Grid.Row="1" Padding="5" HorizontalOptions="EndAndExpand" VerticalOptions="End" IsVisible="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsFolderCheckerVisible}" BackgroundColor="Transparent" BorderColor="Transparent">
-                                    <CheckBox x:Name="NoteChecker" IsChecked="{Binding IsChecked}" WidthRequest="30" HeightRequest="30" Color="{StaticResource First}"/>
-                                </Frame>
-                                <Frame x:Name="NoteInfo" ZIndex="0" Grid.Column="1" Grid.Row="1" Padding="5" HorizontalOptions="EndAndExpand" VerticalOptions="End" IsVisible="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsInfoNoteVisible}" BackgroundColor="Transparent" BorderColor="Transparent">
-                                    <ImageButton Aspect="Center" Clicked="OpenCloseInfoNote" CommandParameter="{Binding .}" Source="info.png" WidthRequest="30" HeightRequest="30" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
-                                </Frame>
-                                <!--<Frame Grid.Column="1" Grid.Row="1" Padding="5" BorderColor="Transparent" ZIndex="3" BackgroundColor="Transparent">
-                                    <ImageButton Aspect="Center" Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.NoteDeleteCommand}" CommandParameter="{Binding .}" Padding="0" Margin="0" Source="trash.png" BackgroundColor="Coral" WidthRequest="35" HeightRequest="35" BorderColor="Transparent" BorderWidth="2" HorizontalOptions="Center" VerticalOptions="End" />
-                                </Frame>-->
-                            </Grid>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+        <ScrollView Grid.Row="3" Padding="10" VerticalScrollBarVisibility="Never">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowSpacing="0">
+                <!--COLONNA SINISTRA-->
+                <CollectionView x:Name="MainViewLeft" ItemsSource="{Binding NotesLeft}" Grid.Column="0">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="10" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:Note">
+                            <Frame Padding="0" Margin="0" BackgroundColor="{StaticResource BackgroundTran}" MaximumHeightRequest="110" MinimumHeightRequest="90" VerticalOptions="Start" ZIndex="5" BorderColor="{StaticResource First}">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
+                                    <!--Controllo tap su nota-->
+                                    <Frame Padding="20" Grid.RowSpan="2" ZIndex="5" BackgroundColor="Transparent" BorderColor="Transparent">
+                                        <Frame.GestureRecognizers>
+                                            <!--<TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.NoteTappedCommand}" CommandParameter="{Binding .}" />-->
+                                            <TapGestureRecognizer Tapped="OnNoteTapped" CommandParameter="{Binding .}" />
+                                        </Frame.GestureRecognizers>
+                                        <Frame.Behaviors>
+                                            <toolkit:TouchBehavior LongPressCommand="{Binding Source={x:Reference ThisPage}, Path=BindingContext.LongPressCommand}" LongPressCommandParameter="{Binding .}" LongPressDuration="650"/>
+                                        </Frame.Behaviors>
+                                    </Frame>
+                                    <!--Titolo-->
+                                    <Frame Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" Grid.ColumnSpan="2" Padding="7,3,3,3" BackgroundColor="{StaticResource Background1}" BorderColor="Transparent" ZIndex="1" >
+                                        <Label Text="{Binding Title}" TextColor="{StaticResource Text1}" VerticalTextAlignment="Center" />
+                                    </Frame>
+                                    <BoxView Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HeightRequest="1" Margin="0,28,0,0" BackgroundColor="{StaticResource First}" ZIndex="2"/>
+                                    <!--Titolo o testo-->
+                                    <Frame Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Padding="7,3,3,3" BackgroundColor="Transparent" BorderColor="Transparent" ZIndex="2">
+                                        <Label Text="{Binding ., Converter={StaticResource TitleOrContentConverter}}" TextColor="{StaticResource Text3}" VerticalTextAlignment="Start" />
+                                    </Frame>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <!--COLONNA DESTRA-->
+                <CollectionView x:Name="MainViewRight" ItemsSource="{Binding NotesRight}" Grid.Column="1">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="10"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:Note">
+                            <Frame Padding="0" Margin="0" BackgroundColor="{StaticResource BackgroundTran}" MaximumHeightRequest="110" MinimumHeightRequest="90" VerticalOptions="Start" ZIndex="5" BorderColor="{StaticResource First}">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
+                                    <!--Controllo tap su nota-->
+                                    <Frame Padding="20" Grid.RowSpan="2" ZIndex="5" BackgroundColor="Transparent" BorderColor="Transparent">
+                                        <Frame.GestureRecognizers>
+                                            <!--<TapGestureRecognizer Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.NoteTappedCommand}" CommandParameter="{Binding .}" />-->
+                                            <TapGestureRecognizer Tapped="OnNoteTapped" CommandParameter="{Binding .}" />
+                                        </Frame.GestureRecognizers>
+                                        <Frame.Behaviors>
+                                            <toolkit:TouchBehavior LongPressCommand="{Binding Source={x:Reference ThisPage}, Path=BindingContext.LongPressCommand}" LongPressCommandParameter="{Binding .}" LongPressDuration="650"/>
+                                        </Frame.Behaviors>
+                                    </Frame>
+                                    <!--Titolo-->
+                                    <Frame Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" Grid.ColumnSpan="2" Padding="7,3,3,3" BackgroundColor="{StaticResource Background1}" BorderColor="Transparent" ZIndex="1" >
+                                        <Label Text="{Binding Title}" TextColor="{StaticResource Text1}" VerticalTextAlignment="Center" />
+                                    </Frame>
+                                    <BoxView Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HeightRequest="1" Margin="0,28,0,0" BackgroundColor="{StaticResource First}" ZIndex="2"/>
+                                    <!--Titolo o testo-->
+                                    <Frame Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Padding="7,3,3,3" BackgroundColor="Transparent" BorderColor="Transparent" ZIndex="2">
+                                        <Label Text="{Binding ., Converter={StaticResource TitleOrContentConverter}}" TextColor="{StaticResource Text3}" VerticalTextAlignment="Start" />
+                                    </Frame>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
         </ScrollView>
 
         <!--POPUP ADD FOLDER #E6A9A9A9-->
         <Frame x:Name="PopupAddFolder" CornerRadius="0" Grid.Row="0" Grid.RowSpan="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource Busy}" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" HasShadow="True">
-            <Frame ZIndex="15" Padding="20" Margin="100, 100, 100, 0" BackgroundColor="{StaticResource Background1}" HasShadow="True" VerticalOptions="Start">
+            <Frame ZIndex="15" Padding="20" Margin="90, 100, 90, 0" BackgroundColor="{StaticResource Background1}" HasShadow="True" VerticalOptions="Start">
                 <Grid RowDefinitions="Auto, Auto, Auto" BackgroundColor="Transparent">
                     <Frame Grid.Row="0" Padding="0" BackgroundColor="Transparent" BorderColor="Transparent">
                         <Label Text="Write the name for the folder" TextColor="{StaticResource Text1}" FontAttributes="Bold" FontSize="Medium" HorizontalTextAlignment="Center"/>
                     </Frame>
                     <Frame Grid.Row="1" Padding="10" Margin="0,0,0,0" BackgroundColor="Transparent" BorderColor="Transparent" VerticalOptions="Start">
-                        <Entry x:Name="EntryFolderName" Placeholder="Folder name" HorizontalOptions="CenterAndExpand" TextColor="{StaticResource Text1}" FontSize="20"/>
+                        <Entry x:Name="EntryFolderName" TextColor="{StaticResource Text2}" Placeholder="Folder name" HorizontalOptions="CenterAndExpand" FontSize="20" />
                     </Frame>
                     <Grid Grid.Row="2" ColumnDefinitions="*, *" Padding="25, 25, 25, 0" ColumnSpacing="25">
-                        <ImageButton Aspect="Center" Source="confirm.png" Clicked="CreateNewFolder" Grid.Column="0" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
-                        <ImageButton Aspect="Center" Source="back.png" Clicked="CloseAddFolder" Grid.Column="1" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}" />
+                        <ImageButton Aspect="Center" Source="yback.png" Clicked="CloseAddFolder" Grid.Column="0" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}" >
+                        </ImageButton>
+                        <ImageButton Aspect="Center" Source="yconfirm.png" Clicked="CreateNewFolder" Grid.Column="1" WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}">
+                        </ImageButton>
                     </Grid>
                 </Grid>
             </Frame>
         </Frame>
         <!--POPUP INFO NOTE #E6A9A9A9-->
-        <Frame x:Name="PopupInfoNote" CornerRadius="0" Grid.Row="0" Grid.RowSpan="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource Busy}" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" HasShadow="True">
-            <Frame ZIndex="15" Padding="20" Margin="100, 100, 100, 0" BackgroundColor="{StaticResource Background1}" HasShadow="True" VerticalOptions="Start">
-                <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto, Auto, Auto, Auto" BackgroundColor="Transparent">
+        <Frame x:Name="PopupInfoNote" IsVisible="{Binding IsPopUpInfoOpen}" CornerRadius="0" Grid.Row="0" Grid.RowSpan="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource Busy}" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" HasShadow="True">
+            <Frame ZIndex="15" Padding="20" Margin="10,0" BackgroundColor="{StaticResource Background1}" HasShadow="True" VerticalOptions="Center" HorizontalOptions="Center">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="20" BackgroundColor="Transparent">
                     <!--INFO TITLE-->
-                    <Frame Grid.Row="0" Grid.ColumnSpan="4" Margin="0,0,0,10" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="CenterAndExpand">
-                        <Label x:Name="InfoNoteName" TextColor="{StaticResource Text1}"/>
+                    <Frame Grid.Row="0" Grid.ColumnSpan="2" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Center">
+                        <Label x:Name="InfoNoteName" Text="{Binding InfoNote.Title}" TextColor="{StaticResource Text3}"/>
                     </Frame>
                     <!--INFO CREATED-->
-                    <Frame Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,5" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent">
+                    <Frame Grid.Row="1" Grid.Column="0" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
                         <Label Text="Created:" TextColor="{StaticResource Text1}"/>
                     </Frame>
-                    <Frame Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,0,5" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent">
-                        <Label x:Name="InfoNoteCreated" TextColor="{StaticResource Text1}"/>
+                    <Frame Grid.Row="1" Grid.Column="1" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="StartAndExpand">
+                        <Label x:Name="InfoNoteCreated" Text="{Binding InfoNote.Created}" TextColor="{StaticResource Text3}"/>
                     </Frame>
                     <!--INFO MODIFIED-->
-                    <Frame Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent">
+                    <Frame Grid.Row="2" Grid.Column="0" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Start">
                         <Label Text="Modified:" TextColor="{StaticResource Text1}"/>
                     </Frame>
-                    <Frame Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent">
-                        <Label x:Name="InfoNoteModified" TextColor="{StaticResource Text1}"/>
+                    <Frame Grid.Row="2" Grid.Column="1" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="StartAndExpand">
+                        <Label x:Name="InfoNoteModified" Text="{Binding InfoNote, Converter={StaticResource ModifiedExistConverter}}" TextColor="{StaticResource Text3}"/>
                     </Frame>
                     <!--EXIT-->
-                    <Frame Grid.Row="3" Grid.ColumnSpan="4" Margin="0,15,0,0" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" VerticalOptions="CenterAndExpand">
-                        <ImageButton Aspect="Center" Clicked="OpenCloseInfoNote" Source="info.png" WidthRequest="35" HeightRequest="35" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
+                    <Frame Grid.Row="3" Grid.ColumnSpan="2" Margin="0" Padding="5" BackgroundColor="Transparent" BorderColor="Transparent" HorizontalOptions="Center">
+                        <ImageButton Aspect="Center" Clicked="OpenCloseInfoNote" Source="yconfirm.png"  WidthRequest="40" HeightRequest="40" BorderWidth="2" BackgroundColor="{StaticResource First}" BorderColor="{StaticResource First}"/>
                     </Frame>
                 </Grid>
             </Frame>

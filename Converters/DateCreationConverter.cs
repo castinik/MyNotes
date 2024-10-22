@@ -9,28 +9,17 @@ using System.Threading.Tasks;
 
 namespace MyNotes.Converters
 {
-    public class TitleOrContentConverter : IValueConverter
+    public class DateCreationConverter : IValueConverter
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is Note note)
+            if (value is DateTime dateTime)
             {
-                if (note.Content == null || note.Content.Length == 0)
-                {
-                    return "No content inserted";
-                }
-                else if (note.Content.Length <= 60)
-                {
-                    return note.Content;
-                }
-                else
-                {
-                    return note.Content.Substring(0, 60);
-                }
+                return dateTime.ToString("dd/MM/yyyy - HH:mm");
             }
             else
             {
-                return "No content";
+                return DateTime.Today.ToString("dd/MM/yyyy - HH:mm");
             }
         }
 

@@ -9,28 +9,20 @@ using System.Threading.Tasks;
 
 namespace MyNotes.Converters
 {
-    public class TitleOrContentConverter : IValueConverter
+    public class BorderColorConverter : IValueConverter
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is Note note)
             {
-                if (note.Content == null || note.Content.Length == 0)
-                {
-                    return "No content inserted";
-                }
-                else if (note.Content.Length <= 60)
-                {
-                    return note.Content;
-                }
+                if (note.IsChecked)
+                    return "#D600AA";
                 else
-                {
-                    return note.Content.Substring(0, 60);
-                }
+                    return "#00bbf0";
             }
             else
             {
-                return "No content";
+                return "";
             }
         }
 

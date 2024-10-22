@@ -26,30 +26,44 @@ namespace MyNotes.ViewModels
         [ObservableProperty]
         Boolean isPopUpFolderOpen;
         [ObservableProperty]
-        Boolean isFolderCheckerVisible;
+        Boolean isPopUpInfoOpen;
         [ObservableProperty]
-        Boolean isInfoNoteVisible;
+        Boolean isOnLongPressure;
+        [ObservableProperty]
+        Boolean isOnTrashOpen;
         [ObservableProperty]
         ObservableCollection<Note> notes;
+        [ObservableProperty]
+        ObservableCollection<Note> notesLeft;
+        [ObservableProperty]
+        ObservableCollection<Note> notesRight;
         [ObservableProperty]
         ObservableCollection<Folder> folders;
 
         public ICommand NoteTappedCommand { get; }
         public ICommand NoteDeleteCommand { get; }
-
         public ICommand FolderTappedCommand { get; }
+        public ICommand LongPressCommand { get; }
+
+        [ObservableProperty]
+        Note infoNote;
 
         public MainViewModel(INoteService noteService)
         {
             _noteService = noteService;
             IsPopUpFolderOpen = false;
-            IsFolderCheckerVisible = false;
-            IsInfoNoteVisible = true;
+            IsPopUpInfoOpen = false;
+            IsOnLongPressure = false;
             Notes = new ObservableCollection<Note>();
+            NotesLeft = new ObservableCollection<Note>();
+            NotesRight = new ObservableCollection<Note>();
             Folders = new ObservableCollection<Folder>();
             NoteTappedCommand = new Command<Note>(OnNoteTapped);
             NoteDeleteCommand = new Command<Note>(OnNoteDelete);
             FolderTappedCommand = new Command<Folder>(OnFolderTapped);
+
+            LongPressCommand = new Command<Note>(OnLongPressCommand);
+            IsOnTrashOpen = false;
         }
 
         public async Task LoadFoldersAsync(Boolean isOrding = false)
@@ -80,20 +94,7 @@ namespace MyNotes.ViewModels
             }
             finally
             {
-                if (Folders.Count > 0)
-                {
-                    List<Folder> listFolder = Folders.OrderBy(n => n.Name).ToList();
-                    Folders.Clear();
-                    foreach (Folder f in listFolder)
-                    {
-                        Folders.Add(f);
-                    }
-                    IsFoldersCount = false;
-                }
-                else
-                {
-                    IsFoldersCount = true;
-                }
+                ReorderFolders();
                 IsBusy = false;
             }
         }
@@ -110,6 +111,8 @@ namespace MyNotes.ViewModels
                 ObservableCollection<Note> notes = await _noteService.LoadNotesAsync();
 
                 Notes.Clear();
+                NotesLeft.Clear();
+                NotesRight.Clear();
                 foreach (Note n in notes)
                 {
                     Notes.Add(n);
@@ -123,20 +126,7 @@ namespace MyNotes.ViewModels
             }
             finally
             {
-                if (Notes.Count > 0)
-                {
-                    List<Note> listNotes = Notes.OrderByDescending(n => n.Created).ToList();
-                    Notes.Clear();
-                    foreach (Note n in listNotes)
-                    {
-                        Notes.Add(n);
-                    }
-                    IsNotesCount = false;
-                }
-                else
-                {
-                    IsNotesCount = true;
-                }
+                ReorderNotes();
                 IsBusy = false;
             }
         }
@@ -177,72 +167,51 @@ namespace MyNotes.ViewModels
             }
         }
 
-        public async Task DeleteElementsChecked()
+        public void DeleteElementsChecked()
         {
             if (IsBusy)
                 return;
 
             IsBusy = true;
 
-            Device.BeginInvokeOnMainThread(async () =>
+            // Prima elimino le note nella home selezionate
+            List<Note> notesToDelete = new List<Note>();
+            notesToDelete.AddRange(NotesLeft.Where(note => note.IsChecked).ToList());
+            notesToDelete.AddRange(NotesRight.Where(note => note.IsChecked).ToList());
+            foreach (Note note in notesToDelete)
             {
-                // Prima elimino le note nella home selezionate
-                List<Note> notesToDelete = Notes.Where(note => note.IsChecked).ToList();
-                foreach (Note note in notesToDelete)
+                if (note.IsChecked)
                 {
-                    if (note.IsChecked)
-                    {
-                        NoteService.DeleteNote(note);
-                        Notes.Remove(note);
-                    }
+                    NoteService.DeleteNote(note);
+                    Notes.Remove(note);
+                    NotesLeft.Remove(note);
+                    NotesRight.Remove(note);
                 }
-                // Poi elimino le note dentro ciascuna cartella selezionata
-                List<Folder> foldersToDelete = Folders.Where(folder => folder.IsChecked).ToList();
-                foreach (Folder folder in foldersToDelete)
+            }
+            // Poi elimino le note dentro ciascuna cartella selezionata
+            List<Folder> foldersToDelete = Folders.Where(folder => folder.IsChecked).ToList();
+            foreach (Folder folder in foldersToDelete)
+            {
+                if (folder.IsChecked)
                 {
-                    if (folder.IsChecked)
-                    {
-                        NoteService.DeleteFolder(folder.Name);
-                        Folders.Remove(folder);
-                    }
+                    NoteService.DeleteFolder(folder.Name);
+                    Folders.Remove(folder);
                 }
-
-                IsBusy = false;
-            });
-        }
-
-        public async Task UnsetElementChecker()
-        {
-            if (IsBusy) return;
-
-            Device.BeginInvokeOnMainThread(() => {
-                foreach (Folder folder in Folders)
-                {
-                    if (folder.IsChecked)
-                        folder.IsChecked = false;
-                }
-
-                foreach (Note note in Notes)
-                {
-                    if (note.IsChecked)
-                        note.IsChecked = false;
-                }
-            });
-
-            //await Task.Run(() =>
-            //{
-            //    ObservableCollection<Folder> oldFolders = new ObservableCollection<Folder>(Folders);
-            //    ObservableCollection<Note> oldNotes = new ObservableCollection<Note>(Notes);
-            //    Notes.Clear();
-            //    Folders.Clear();
-
-            //});
+            }
+            ReorderNotes();
+            IsBusy = false;
         }
 
         public async void OnNoteTapped(Note note)
         {
-            if (note == null)
+            if (note == null || IsOnLongPressure)
                 return;
+
+            if (IsOnTrashOpen)
+            {
+                note.IsChecked = true;
+                return;
+            }
 
             Preferences.Set("tempNote", note.Id.ToString());
 
@@ -310,6 +279,62 @@ namespace MyNotes.ViewModels
             });
 
             IsBusy = false;
+        }
+
+        public async void OnLongPressCommand(Note note)
+        {
+            IsOnLongPressure = true;
+            IsPopUpInfoOpen = true;
+            InfoNote = Notes.Where(n => n.Id == note.Id).First();
+            //await Shell.Current.DisplayAlert("Pressione Prolungata", "Hai tenuto premuto sulla Label!", "OK");
+        }
+        
+        public async void ReorderNotes()
+        {
+            if (Notes.Count > 0)
+            {
+                Int32 count = 0;
+                List<Note> listNotes = Notes.OrderByDescending(n => n.Created).ToList();
+                Notes.Clear();
+                NotesLeft.Clear();
+                NotesRight.Clear();
+                foreach (Note n in listNotes)
+                {
+                    Notes.Add(n);
+                    if (count % 2 == 0)
+                    {
+                        NotesLeft.Add(n);
+                    }
+                    else
+                    {
+                        NotesRight.Add(n);
+                    }
+                    count++;
+                }
+                IsNotesCount = false;
+            }
+            else
+            {
+                IsNotesCount = true;
+            }
+        }
+    
+        public void ReorderFolders()
+        {
+            if (Folders.Count > 0)
+            {
+                List<Folder> listFolder = Folders.OrderBy(n => n.Name).ToList();
+                Folders.Clear();
+                foreach (Folder f in listFolder)
+                {
+                    Folders.Add(f);
+                }
+                IsFoldersCount = false;
+            }
+            else
+            {
+                IsFoldersCount = true;
+            }
         }
     }
 }
