@@ -21,6 +21,8 @@ namespace MyNotes.ViewModels
         Boolean isBusy;
         [ObservableProperty]
         Boolean isInList;
+        [ObservableProperty]
+        Boolean isInTodo;
 
         [ObservableProperty]
         Note note;
@@ -33,6 +35,7 @@ namespace MyNotes.ViewModels
             _noteService = noteService;
             note = new Note();
             IsInList = false;
+            IsInTodo = false;
             SaveNoteCommand = new Command(async () => await SaveNoteAsync());
             ComeBackCommand = new Command(async () => await ComeBackAsync());
         }
@@ -125,10 +128,7 @@ namespace MyNotes.ViewModels
     
         private async Task ComeBackAsync()
         {
-            Boolean isNoteModifyed = await IsNoteModifyed();
-
-            if (isNoteModifyed)
-                await SaveNoteAsync();
+            await SaveNoteAsync(); 
 
             // Verifico se la nota è stata modificata in una cartella;
             String pageToRedirect = String.Empty;
@@ -147,9 +147,8 @@ namespace MyNotes.ViewModels
             String folder = Preferences.Get("tempFolder", null);
 
             ObservableCollection<Note> oldNotes = await _noteService.LoadNotesAsync(folder);
-            Note oldNote = oldNotes.First(n => n.Id == Note.Id);
-
-            if (oldNote.Title != Note.Title || oldNote.Content != Note.Content)
+            Note oldNote = oldNotes.Where(n => n.Id == Note.Id).FirstOrDefault();
+            if (oldNote == null || (oldNote.Title != Note.Title || oldNote.Content != Note.Content))
             {
                 return true;
             }

@@ -27,7 +27,7 @@ namespace MyNotes
                 }
                 else
                 {
-                    KeyboardHelper.TriggerKeyboardDisappeared();
+                    KeyboardHelper.TriggerKeyboardAppeared(0);
                 }
             };
         }

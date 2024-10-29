@@ -2,6 +2,7 @@ using MyNotes.Helpers;
 using MyNotes.Models;
 using MyNotes.Services;
 using MyNotes.ViewModels;
+using Windows.Devices.Enumeration;
 
 namespace MyNotes.Pages
 {
@@ -17,12 +18,13 @@ namespace MyNotes.Pages
             BindingContext = vm;
             _vm = vm;
             KeyboardHelper.KeyboardAppearedEvent += OnKeyboardAppeared;
+            
         }
 
         protected override bool OnBackButtonPressed()
         {
-            _vm.SaveNoteCommand.Execute(null);
-            return base.OnBackButtonPressed();
+            _vm.ComeBackCommand.Execute(null);
+            return true;
         }
 
         private void OnKeyboardAppeared(object sender, double keyboardHeight)
@@ -83,6 +85,24 @@ namespace MyNotes.Pages
             //    lastChars += mainEditor.ToCharArray()[cursorPosition - 2];
             //    lastChars += mainEditor[cursorPosition - 1];
             //}  && (lastChars != Data.BulletedList)
+            if (e.NewTextValue.EndsWith("\n"))
+            {
+                // Scorri verso il basso dopo aver aggiunto una nuova riga
+                Dispatcher.Dispatch(async () =>
+                {
+                    //await EditorScroll.ScrollToAsync(MainEditor, ScrollToPosition.End, true);
+                    EditorScroll.ForceLayout();
+                });
+                //if (MainEditor.MinimumHeightRequest >= 450)
+                //{
+                //    EditorScroll.ScrollToAsync(0, Y - 30, true);
+                //}
+                //else
+                //{
+                //    MainEditor.MinimumHeightRequest += 30;
+                //}
+            }
+
             if (_vm.IsInList && e.NewTextValue.EndsWith("\n"))
             {
                 String newContent = $"{MainEditor.Text}{Data.BulletedList}";
@@ -93,6 +113,10 @@ namespace MyNotes.Pages
             if (e.NewTextValue.EndsWith(Data.BulletedList))
             {
                 MainEditor.CursorPosition = MainEditor.Text.Length;
+            }
+            else
+            {
+
             }
             return;
         }
@@ -109,6 +133,7 @@ namespace MyNotes.Pages
             if (_vm.IsInList)
             {
                 _vm.IsInList = false;
+                BulletedList.BorderColor = (Color)Application.Current.Resources["First"];
             }
             else
             {
@@ -130,9 +155,42 @@ namespace MyNotes.Pages
                 {
                     MainEditor.Text = $"{Data.BulletedList}";
                 }
+                BulletedList.BorderColor = (Color)Application.Current.Resources["Text1"];
                 MainEditor.CursorPosition = MainEditor.Text.Length;
             }
         }
 
+        private void TodoButtonClicked(object sender, EventArgs e)
+        {
+            // Tolgo la lista
+            if (_vm.IsInTodo)
+            {
+                _vm.IsInTodo = false;
+                CheckList.BorderColor = (Color)Application.Current.Resources["First"];
+            }
+            else
+            {
+                _vm.IsInTodo = true;
+                if (!String.IsNullOrEmpty(MainEditor.Text))
+                {
+                    String[] lines = MainEditor.Text.Split("\n");
+                    String lastLine = lines[lines.Length - 1];
+                    if (String.IsNullOrEmpty(lastLine))
+                    {
+                        MainEditor.Text = $"{MainEditor.Text}{Data.BulletedList}";
+                    }
+                    else
+                    {
+                        MainEditor.Text = $"{MainEditor.Text}\n{Data.BulletedList}";
+                    }
+                }
+                else
+                {
+                    MainEditor.Text = $"{Data.BulletedList}";
+                }
+                CheckList.BorderColor = (Color)Application.Current.Resources["Text1"];
+                MainEditor.CursorPosition = MainEditor.Text.Length;
+            }
+        }
     }
 }
